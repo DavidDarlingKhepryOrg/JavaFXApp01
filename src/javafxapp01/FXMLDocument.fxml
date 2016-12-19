@@ -8,11 +8,9 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="AnchorPane" fx:id="root" prefHeight="550.0" prefWidth="322.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxapp01.FXMLDocumentController">
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="550.0" prefWidth="582.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxapp01.FXMLDocumentController">
     <children>
-        <Button fx:id="button" layoutX="130.0" layoutY="500.0" onAction="#handleButtonAction" text="Click Me!" />
-        <Label fx:id="label" layoutX="126" layoutY="120" minHeight="16" minWidth="69" />
-      <MenuBar fx:id="menubar" layoutX="2.0" layoutY="2.0" prefHeight="25.0" prefWidth="320.0">
+      <MenuBar fx:id="menubar" layoutX="2.0" layoutY="2.0" prefHeight="25.0" prefWidth="582.0">
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
@@ -31,7 +29,11 @@
           </Menu>
         </menus>
       </MenuBar>
-      <TextArea id="textareaRaw" fx:id="textareaRaw" layoutX="61.0" layoutY="47.0" prefHeight="200.0" prefWidth="200.0" text="HL7 (raw) goes here!" />
-      <TextArea id="textareaXml" fx:id="textareaXml" layoutX="63.0" layoutY="261.0" prefHeight="200.0" prefWidth="200.0" text="HL7 (xml) goes here!" />
+      <TextArea id="textareaRAW" fx:id="textareaRAW" layoutX="61.0" layoutY="47.0" prefHeight="200.0" prefWidth="200.0" text="HL7 (raw) goes here!" />
+      <TextArea id="textareaXML" fx:id="textareaXML" layoutX="63.0" layoutY="261.0" prefHeight="200.0" prefWidth="200.0" text="HL7 (xml) goes here!" />
+      <Button fx:id="btnRAWToXML" layoutX="122.0" layoutY="473.0" onAction="#handleRAWToXML" text="RAW to XML" />
+      <TextArea id="textareaXSLT" fx:id="textareaXSLT" layoutX="322.0" layoutY="47.0" prefHeight="200.0" prefWidth="200.0" text="XSLT goes here!" />
+      <TextArea id="textareaXMLT" fx:id="textareaXMLT" layoutX="324.0" layoutY="261.0" prefHeight="200.0" prefWidth="200.0" text="XMLT goes here!" />
+      <Button fx:id="btnXMLviaXSLT" layoutX="383.0" layoutY="473.0" onAction="#handleXMLviaXSLT" text="XML via XSLT" />
     </children>
 </AnchorPane>
