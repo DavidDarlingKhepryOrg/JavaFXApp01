@@ -47,6 +47,11 @@ import java.util.logging.Logger;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import java.util.List;
+
 
 public class FXMLDocumentController implements Initializable {
     
@@ -60,6 +65,8 @@ public class FXMLDocumentController implements Initializable {
     private TextArea textareaXSLT;
     @FXML
     private TextArea textareaXMLT;
+    @FXML
+    private TextArea textareaJSON;
 
     String msg = "MSH|^~\\&|HIS|RIH|EKG|EKG|199904140038||ADT^A01||P|2.2\r"
                  + "PID|0001|00009874|00001122|A00977|SMITH^JOHN^M|MOM|19581119|F|NOTREAL^LINDA^M|C|564 SPRING ST^^NEEDHAM^MA^02494^US|0002|(818)565-1551|(425)828-3344|E|S|C|0000444444|252-00-4414||||SA|||SA||||NONE|V1|0001|I|D.ER^50A^M110^01|ER|P00055|11B^M011^02|070615^BATMAN^GEORGE^L|555888^NOTREAL^BOB^K^DR^MD|777889^NOTREAL^SAM^T^DR^MD^PHD|ER|D.WT^1A^M010^01|||ER|AMB|02|070615^NOTREAL^BILL^L|ER|000001916994|D||||||||||||||||GDD|WA|NORM|02|O|02|E.IN^02D^M090^01|E.IN^01D^M080^01|199904072124|199904101200|199904101200||||5555112333|||666097^NOTREAL^MANNY^P\r"
@@ -177,12 +184,28 @@ public class FXMLDocumentController implements Initializable {
         String result = "";
         
         try {
-            result = transform(xmlRAW.replace('\r', '\n'), xsltMatchReplace.replace('\r', '\n'));
+            result = transformXMLviaXSL(xmlRAW.replace('\r', '\n'), xsltMatchReplace.replace('\r', '\n'));
         } catch (TransformerException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
          
         textareaXMLT.setText(result);
+    }
+    
+    @FXML
+    private void handleJSONviaXML(ActionEvent event) throws HL7Exception, IOException {
+        
+        // replace below with HAPIFHIR logic from JvHapiFhir Eclipse project!
+        
+        XmlMapper xmlMapper = new XmlMapper();
+        List entries = xmlMapper.readValue(xmlRAW, List.class);
+		
+        ObjectMapper jsonMapper = new ObjectMapper();
+        String jsonEncoded = jsonMapper.writeValueAsString(entries); 
+        JsonNode jsonNode = jsonMapper.readValue(jsonEncoded, JsonNode.class);
+        String result = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+         
+        textareaJSON.setText(result);
     }
     
     @FXML
@@ -200,7 +223,7 @@ public class FXMLDocumentController implements Initializable {
         // TODO
     }    
 
-    private String transform(String inputXML, String inputXSL)
+    private String transformXMLviaXSL(String inputXML, String inputXSL)
             throws TransformerConfigurationException,
             TransformerException
     {
