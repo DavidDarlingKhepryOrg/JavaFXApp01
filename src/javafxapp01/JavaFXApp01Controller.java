@@ -51,9 +51,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import java.util.List;
+import javax.script.Invocable;
+
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 
-public class FXMLDocumentController implements Initializable {
+public class JavaFXApp01Controller implements Initializable {
     
     @FXML
     private MenuBar menubar;
@@ -61,6 +66,10 @@ public class FXMLDocumentController implements Initializable {
     private TextArea textareaRAW;
     @FXML
     private TextArea textareaXML;
+    @FXML
+    private TextArea textareaJS;
+    @FXML
+    private TextArea textareaXMLJ;
     @FXML
     private TextArea textareaXSLT;
     @FXML
@@ -93,6 +102,15 @@ public class FXMLDocumentController implements Initializable {
                               "    </xsl:template>\r" +
                               "    <xsl:template match=\"PrintDollarsAndCents/text()[.='X']\">Y</xsl:template>\r" +
                               "</xsl:stylesheet>";
+    
+    String jsFunc1 = "var func1 = function(name) {\r" +
+                     "    print('Hi there from Javascript, ' + name);\r" +
+                     "    return 'greetings by ' + name + ' via javascript function!';\r" +
+                     "};";
+    
+    String jsFunc2 = "var func2 = function (object) {\r" +
+                     "    print('JS Class Definition: ' + Object.prototype.toString.call(object));\r" +
+                     "};";
     
     @FXML
     private void handleRAWToXML(ActionEvent event) throws HL7Exception {
@@ -177,16 +195,44 @@ public class FXMLDocumentController implements Initializable {
     }
     
     @FXML
+    private void handleXMLviaJS(ActionEvent event) throws HL7Exception {
+
+        Object result = "";
+        
+        String jsScript = jsFunc1.replace('\r', '\n');
+        
+        textareaJS.setText(jsScript);
+
+        try {
+            
+            ScriptEngineManager factory = new ScriptEngineManager();
+            // ScriptEngine scriptEngine = factory.getEngineByName("nashorn");
+            ScriptEngine scriptEngine = factory.getEngineByName("javascript");
+            scriptEngine.eval(jsScript);
+            
+            Invocable invocable = (Invocable)scriptEngine;
+            result = invocable.invokeFunction("func1", "David Darling");
+        } catch (ScriptException | NoSuchMethodException ex) {
+            Logger.getLogger(JavaFXApp01Controller.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            
+        textareaXMLJ.setText(result.toString());
+    }
+    
+    @FXML
     private void handleXMLviaXSLT(ActionEvent event) throws HL7Exception {
         
-        textareaXSLT.setText(xsltMatchReplace.replace('\r', '\n'));
+        textareaXSLT.setText("");
+        if (xsltMatchReplace != null) {
+            textareaXSLT.setText(xsltMatchReplace.replace('\r', '\n'));
+        }
 
         String result = "";
         
         try {
             result = transformXMLviaXSL(xmlRAW.replace('\r', '\n'), xsltMatchReplace.replace('\r', '\n'));
         } catch (TransformerException ex) {
-            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JavaFXApp01Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
          
         textareaXMLT.setText(result);
@@ -198,7 +244,7 @@ public class FXMLDocumentController implements Initializable {
         // replace below with HAPIFHIR logic from JvHapiFhir Eclipse project!
         
         XmlMapper xmlMapper = new XmlMapper();
-        List entries = xmlMapper.readValue(xmlRAW, List.class);
+        Object entries = xmlMapper.readValue(xmlRAW, Object.class);
 		
         ObjectMapper jsonMapper = new ObjectMapper();
         String jsonEncoded = jsonMapper.writeValueAsString(entries); 
@@ -233,6 +279,24 @@ public class FXMLDocumentController implements Initializable {
 
         TransformerFactory tFactory = TransformerFactory.newInstance();
         Transformer transformer = tFactory.newTransformer(xslInput); // this is the line that throws the exception
+
+        StringWriter stringWriter = new StringWriter();
+        StreamResult result = new StreamResult(stringWriter);
+        transformer.transform(xmlInput, result);
+
+        return stringWriter.toString();
+    }
+
+    private String transformXMLviaJS(String inputXML, String inputJS)
+            throws TransformerConfigurationException,
+            TransformerException
+    {
+        
+        Source xmlInput = new StreamSource(new StringReader(inputXML));
+        Source jsInput = new StreamSource(new StringReader(inputJS));
+
+        TransformerFactory tFactory = TransformerFactory.newInstance();
+        Transformer transformer = tFactory.newTransformer(jsInput); // this is the line that throws the exception
 
         StringWriter stringWriter = new StringWriter();
         StreamResult result = new StreamResult(stringWriter);
